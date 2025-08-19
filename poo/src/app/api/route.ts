@@ -1,6 +1,5 @@
-import next from "next";
 import { NextRequest, NextResponse } from "next/server";
-import { json } from "stream/consumers";
+import postgres from "postgres";
 
 interface Post{ //Interfaz para el post
     id: number;
@@ -11,12 +10,7 @@ interface Post{ //Interfaz para el post
 
 export async function POST(request: NextRequest){
     try {
-        const data: Partial<Post> = await request.json();
-
-        // Validacion de id, para que sea mayor a 0
-        if (!data.id || typeof data.id !== "number" || data.id <= 0 ) {
-            return NextResponse.json ({error: "El id debe ser un numero mayor a 0"}, {status: 400}); 
-        }
+        const data = await request.json();
 
         // Validacion del titulo, para que este lleno 
         if (!data.title || data.title.trim().length === 0) {
@@ -33,18 +27,11 @@ export async function POST(request: NextRequest){
             return NextResponse.json({error: "El autor no puede estar vacio"}, {status:400});
         }
 
-
-        // A la hora de pasar estas validaciones, se puede simular el guardado de memoria 
-        const newPost: Post = {
-            id: data.id,
-            title: data.title,
-            description: data.description,
-            autor: data.autor,
-        };
-
+        const connectionString = "postgresql://postgres.dfcqtcfixfvcfyjjeeyd:Waffle23-08@aws-0-us-east-1.pooler.supabase.com:6543/postgres";
+        const sql = postgres(connectionString, { ssl: "require" });
+        
         return NextResponse.json({
-            message: "Post Creado Correctamente",
-            post: newPost,
+            message: "Post Creado Correctamente y guardado en la BD",
         });
 
     } catch (error) {
