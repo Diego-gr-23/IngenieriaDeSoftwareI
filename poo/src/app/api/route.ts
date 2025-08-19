@@ -6,10 +6,7 @@ export async function POST(request: NextRequest){
     try {
         const data = await request.json();
 
-        const publication = new Publication(data.title, data.description, data.autor);
         const register = new PublicationRegister ()
-
-        register.save(publication);
         
         return NextResponse.json({
             message: "Post Creado Correctamente y guardado en la BD",

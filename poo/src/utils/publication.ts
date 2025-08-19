@@ -1,33 +1,25 @@
-export default class Publication {
-    public title:string;
-    public description: string;
-    public autor: string;
+import PublicationTitle from "./publication-title";
+import PublicationDescription from "./publication-description";
+import PublicationAutor from "./publication-autor";
 
-    constructor(title: string, description: string, autor:string){
-        this.isValidTitle(title);
+
+export default class Publication {
+    public title: PublicationTitle;
+    public description: PublicationDescription;
+    public autor: PublicationAutor;
+
+    constructor(title: PublicationTitle, description: PublicationDescription, autor:PublicationAutor){
         this.title = title;
-        this.isValidDescription(description);
         this.description = description;
-        this.isValidAutor(autor);
         this.autor = autor; 
     }
 
-    // Funciones para validar datos
-    private isValidTitle(title: string): void { 
-        if (!title || title.trim().length === 0) {
-            throw new Error("El titulo no puede estar vacio");
-        }
-    }
-
-    private isValidDescription(description: string): void {
-        if (!description || description.trim().length === 0){
-            throw new Error("La descripcion no puede estar vacia");
-        }
-    }
-
-    private isValidAutor(autor: string): void {
-        if (!autor || autor.trim().length === 0){
-            throw new Error("El autor no puede estar vacio");
-        }
+    public static create(title: string, description: string, autor: string) {
+        const publication = new Publication(
+            new PublicationTitle(title),
+            new PublicationDescription(description),
+            new PublicationAutor(autor)
+        );
+        return publication;
     }
 }
