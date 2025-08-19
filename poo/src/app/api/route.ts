@@ -12,39 +12,53 @@ export async function POST(request: NextRequest){
     try {
         const data = await request.json();
 
-        // Validacion del titulo, para que este lleno 
-        if (!data.title || data.title.trim().length === 0) {
-            return NextResponse.json({error: "El titulo no puede estar vacio"}, {status: 400});
-        }
+        //Validaciones 
+        isValidTitle(data.title);
+        isValidDescription(data.description);
+        isValidAutor(data.autor);
 
-        // Validacion de descripcion, para que este llena 
-        if (!data.description || data.description.trim().length === 0){
-            return NextResponse.json({error: "La descripcion no puede estar vacia"}, {status: 400});
-        }
-
-        // Validacion de autor, para que este lleno
-        if (!data.autor || data.autor.trim().length === 0) {
-            return NextResponse.json({error: "El autor no puede estar vacio"}, {status:400});
-        }
-
-        // Aca se hace la conexion a la BD
-        const connectionString = "postgresql://postgres.dfcqtcfixfvcfyjjeeyd:Waffle23-08@aws-0-us-east-1.pooler.supabase.com:6543/postgres";
-        const sql = postgres(connectionString, { ssl: "require" });
-
-        // Aca se crea el espacio para poder guardar datos en la BD
-        const result = await sql<Post[]>`
-            insert into post (title, description, autor)
-            values (${data.title}, ${data.description}, ${data.autor})
-            returning *;
-        `;
+        //Guardar en la BD
+        const newPost = await savePost(data.title, data.description, data.autor);
         
         return NextResponse.json({
             message: "Post Creado Correctamente y guardado en la BD",
-            post: result[0],
+            post: newPost,
         });
-
     } catch (error) {
         console.error("Error al crear el post", error);
         return NextResponse.json({error: "Error del servidor"}, {status: 500});
-    } 
+    }   
+}
+
+// Funciones para validar datos
+function isValidTitle(title: string): void { 
+    if (!title || title.trim().length === 0) {
+        throw new Error("El titulo no puede estar vacio");
+    }
+}
+
+function isValidDescription(description: string): void {
+    if (!description || description.trim().length === 0){
+        throw new Error("La descripcion no puede estar vacia");
+    }
+}
+
+function isValidAutor(autor: string): void {
+    if (!autor || autor.trim().length === 0){
+        throw new Error("El autor no puede estar vacio");
+    }
+}
+
+// Aca se hace la conexion y se guarda en la BD
+async function savePost(title: string, description: string, autor: string): promise<Post> {
+    const connectionString = "postgresql://postgres.dfcqtcfixfvcfyjjeeyd:Waffle23-08@aws-0-us-east-1.pooler.supabase.com:6543/postgres";
+    const sql = postgres(connectionString, { ssl: "require" });
+    
+    const result = await sql<Post[]>`
+        insert into post (title, description, autor)
+        values (${title}, ${description}, ${autor})
+        returning *;
+    `;
+
+    return result[0];
 }
