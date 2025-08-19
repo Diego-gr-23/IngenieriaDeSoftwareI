@@ -25,4 +25,12 @@ export default class PostgresPublicationRepository implements PublicationReposit
             throw new Error ("Error al guardar en la BD ")
         }
     }
+    async getPublications(): Promise<Publication[]> {
+        try {
+            const rows = await this.sql`SELECT * FROM publication;`
+            return rows.map(row => new Publication(row.title, row.description, row.autor));
+        } catch {
+            throw new Error("No se pudo obtener la publicaion");
+        }
+    }
 }
