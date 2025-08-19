@@ -27,11 +27,20 @@ export async function POST(request: NextRequest){
             return NextResponse.json({error: "El autor no puede estar vacio"}, {status:400});
         }
 
+        // Aca se hace la conexion a la BD
         const connectionString = "postgresql://postgres.dfcqtcfixfvcfyjjeeyd:Waffle23-08@aws-0-us-east-1.pooler.supabase.com:6543/postgres";
         const sql = postgres(connectionString, { ssl: "require" });
+
+        // Aca se crea el espacio para poder guardar datos en la BD
+        const result = await sql<Post[]>`
+            insert into post (title, description, autor)
+            values (${data.title}, ${data.description}, ${data.autor})
+            returning *;
+        `;
         
         return NextResponse.json({
             message: "Post Creado Correctamente y guardado en la BD",
+            post: result[0],
         });
 
     } catch (error) {
